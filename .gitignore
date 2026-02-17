@@ -1,0 +1,42 @@
+# .NET build outputs
+**/[Bb]in/
+**/[Oo]bj/
+artifacts/
+out/
+
+# Test outputs and coverage
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+coverage/
+coverage-*/
+
+# User-specific and IDE files
+.vs/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+*.swp
+*.sln.iml
+.idea/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+
+# Aspire local state
+.aspire/
+
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini

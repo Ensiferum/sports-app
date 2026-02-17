@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-SportsAggregator.Ingestion-dacd35bc-ad9a-41fb-85f7-30963346eaf1</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit.RabbitMQ" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SportsAggregator.Domain\SportsAggregator.Domain.csproj" />
+    <ProjectReference Include="..\SportsAggregator.Infrastructure\SportsAggregator.Infrastructure.csproj" />
+    <ProjectReference Include="..\SportsAggregator.ServiceDefaults\SportsAggregator.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>

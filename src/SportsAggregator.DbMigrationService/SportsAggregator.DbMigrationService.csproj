@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-SportsAggregator.DbMigrationService-b4e8632c-c392-43da-9e8f-b646b18c5fba</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SportsAggregator.Infrastructure\SportsAggregator.Infrastructure.csproj" />
+    <ProjectReference Include="..\SportsAggregator.ServiceDefaults\SportsAggregator.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>

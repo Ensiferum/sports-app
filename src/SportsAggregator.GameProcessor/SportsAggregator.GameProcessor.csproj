@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-SportsAggregator.GameProcessor-dd397903-370a-43a5-8f1c-d180f46262db</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Aspire.StackExchange.Redis" />
+    <PackageReference Include="MassTransit.RabbitMQ" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SportsAggregator.Domain\SportsAggregator.Domain.csproj" />
+    <ProjectReference Include="..\SportsAggregator.Infrastructure\SportsAggregator.Infrastructure.csproj" />
+    <ProjectReference Include="..\SportsAggregator.ServiceDefaults\SportsAggregator.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>

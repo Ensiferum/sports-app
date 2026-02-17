@@ -1,0 +1,24 @@
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.1.1">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SportsAggregator.Api\SportsAggregator.Api.csproj" />
+    <ProjectReference Include="..\SportsAggregator.Ingestion\SportsAggregator.Ingestion.csproj" />
+    <ProjectReference Include="..\SportsAggregator.GameProcessor\SportsAggregator.GameProcessor.csproj" />
+    <ProjectReference Include="..\SportsAggregator.DbMigrationService\SportsAggregator.DbMigrationService.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" />
+    <PackageReference Include="Aspire.Hosting.Redis" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>c315aacb-4a93-4c75-bfa9-c7f3f80a379f</UserSecretsId>
+  </PropertyGroup>
+
+</Project>
