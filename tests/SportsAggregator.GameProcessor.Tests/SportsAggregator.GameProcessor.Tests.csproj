@@ -13,6 +13,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="AwesomeAssertions" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="xunit" />
@@ -27,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\SportsAggregator.GameProcessor\SportsAggregator.GameProcessor.csproj" />
     <ProjectReference Include="..\..\src\SportsAggregator.Infrastructure\SportsAggregator.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\SportsAggregator.Domain\SportsAggregator.Domain.csproj" />
   </ItemGroup>

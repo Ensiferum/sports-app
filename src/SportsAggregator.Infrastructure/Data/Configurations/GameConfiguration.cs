@@ -39,8 +39,8 @@ public sealed class GameConfiguration : IEntityTypeConfiguration<Game>
             .HasMaxLength(256)
             .IsRequired();
 
-        builder.Property(x => x.Fingerprint)
-            .HasColumnName("fingerprint")
+        builder.Property(x => x.MatchKey)
+            .HasColumnName("match_key")
             .HasMaxLength(64)
             .IsRequired();
 
@@ -48,8 +48,7 @@ public sealed class GameConfiguration : IEntityTypeConfiguration<Game>
             .HasColumnName("created_at_utc")
             .IsRequired();
 
-        builder.HasIndex(x => x.Fingerprint)
-            .IsUnique();
+        builder.HasIndex(x => new { x.MatchKey, x.ScheduledAtUtc });
 
         builder.HasIndex(x => x.SportType);
         builder.HasIndex(x => x.CompetitionName);

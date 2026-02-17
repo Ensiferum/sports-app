@@ -14,7 +14,7 @@ public sealed class Game
 
     public string AwayTeam { get; set; } = string.Empty;
 
-    public string Fingerprint { get; set; } = string.Empty;
+    public string MatchKey { get; set; } = string.Empty;
 
     public DateTime CreatedAtUtc { get; set; }
 }

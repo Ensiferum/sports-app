@@ -48,11 +48,11 @@ namespace SportsAggregator.Infrastructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at_utc");
 
-                    b.Property<string>("Fingerprint")
+                    b.Property<string>("MatchKey")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
-                        .HasColumnName("fingerprint");
+                        .HasColumnName("match_key");
 
                     b.Property<string>("HomeTeam")
                         .IsRequired()
@@ -74,8 +74,7 @@ namespace SportsAggregator.Infrastructure.Data.Migrations
 
                     b.HasIndex("CompetitionName");
 
-                    b.HasIndex("Fingerprint")
-                        .IsUnique();
+                    b.HasIndex("MatchKey", "ScheduledAtUtc");
 
                     b.HasIndex("ScheduledAtUtc");
 

@@ -1,45 +1,43 @@
 using MassTransit;
-using Npgsql;
+using Microsoft.EntityFrameworkCore;
 using SportsAggregator.Domain.Contracts;
 using SportsAggregator.Domain.Entities;
 using SportsAggregator.Domain.Services;
 using SportsAggregator.Infrastructure.Data;
-using SportsAggregator.Infrastructure.Services;
 
 namespace SportsAggregator.GameProcessor;
 
 public sealed class GameMessageConsumer(
     SportsDbContext dbContext,
-    IDeduplicationService deduplicationService,
     ILogger<GameMessageConsumer> logger) : IConsumer<IngestedGameMessage>
 {
-    private static readonly TimeSpan DeduplicationTtl = TimeSpan.FromHours(2);
+    private static readonly TimeSpan DuplicateWindow = TimeSpan.FromHours(2);
 
     public async Task Consume(ConsumeContext<IngestedGameMessage> context)
     {
         var message = context.Message;
+        var scheduledAtUtc = EnsureUtc(message.ScheduledAtUtc);
 
-        var primaryFingerprint = FingerprintGenerator.Generate(
+        var matchKey = MatchKeyGenerator.Generate(
             message.SportType,
             message.CompetitionName,
             message.HomeTeam,
-            message.AwayTeam,
-            message.ScheduledAtUtc);
+            message.AwayTeam);
 
-        var adjacentFingerprint = FingerprintGenerator.GenerateAdjacentBucket(
-            message.SportType,
-            message.CompetitionName,
-            message.HomeTeam,
-            message.AwayTeam,
-            message.ScheduledAtUtc);
+        var windowStartUtc = scheduledAtUtc - DuplicateWindow;
+        var windowEndUtc = scheduledAtUtc + DuplicateWindow;
 
-        var isDuplicate = await deduplicationService.IsDuplicateAsync(
-            primaryFingerprint,
-            adjacentFingerprint,
-            context.CancellationToken);
+        var isDuplicate = await dbContext.Games
+            .AsNoTracking()
+            .AnyAsync(
+                game => game.MatchKey == matchKey
+                    && game.ScheduledAtUtc >= windowStartUtc
+                    && game.ScheduledAtUtc <= windowEndUtc,
+                context.CancellationToken);
 
         if (isDuplicate)
         {
+            logger.LogInformation("Duplicate game detected by absolute 2-hour window");
             return;
         }
 
@@ -48,27 +46,17 @@ public sealed class GameMessageConsumer(
             var game = new Game
             {
                 Id = Guid.CreateVersion7(),
-                ScheduledAtUtc = message.ScheduledAtUtc,
-                SportType = message.SportType.Trim().ToLowerInvariant(),
+                ScheduledAtUtc = scheduledAtUtc,
+                SportType = MatchKeyGenerator.Normalize(message.SportType),
                 CompetitionName = message.CompetitionName.Trim(),
                 HomeTeam = message.HomeTeam.Trim(),
                 AwayTeam = message.AwayTeam.Trim(),
-                Fingerprint = primaryFingerprint,
+                MatchKey = matchKey,
                 CreatedAtUtc = DateTime.UtcNow
             };
 
             dbContext.Games.Add(game);
             await dbContext.SaveChangesAsync(context.CancellationToken);
-
-            await deduplicationService.MarkAsProcessedAsync(
-                primaryFingerprint,
-                DeduplicationTtl,
-                context.CancellationToken);
-        }
-        catch (PostgresException ex) when (ex.SqlState == "23505")
-        {
-            logger.LogInformation("Duplicate game detected by unique constraint");
-            await MarkFingerprintAsProcessedAsync(primaryFingerprint, context.CancellationToken);
         }
         catch (Exception ex)
         {
@@ -77,15 +65,8 @@ public sealed class GameMessageConsumer(
         }
     }
 
-    private async Task MarkFingerprintAsProcessedAsync(string fingerprint, CancellationToken cancellationToken)
+    private static DateTime EnsureUtc(DateTime value)
     {
-        try
-        {
-            await deduplicationService.MarkAsProcessedAsync(fingerprint, DeduplicationTtl, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "Failed to mark duplicate fingerprint as processed");
-        }
+        return value.Kind == DateTimeKind.Utc ? value : value.ToUniversalTime();
     }
 }

@@ -2,13 +2,11 @@ using MassTransit;
 using SportsAggregator.GameProcessor;
 using SportsAggregator.Domain.Contracts;
 using SportsAggregator.Infrastructure.Data;
-using SportsAggregator.Infrastructure.Services;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 builder.AddNpgsqlDbContext<SportsDbContext>("sportsdb");
-builder.AddRedisClient("redis");
 
 builder.Services.AddMassTransit(bus =>
 {
@@ -22,13 +20,12 @@ builder.Services.AddMassTransit(bus =>
         cfg.Host(new Uri(connectionString));
         cfg.ReceiveEndpoint(QueueConstants.QueueName, endpoint =>
         {
-            endpoint.PrefetchCount = 20;
+            endpoint.PrefetchCount = 1;
+            endpoint.ConcurrentMessageLimit = 1;
             endpoint.ConfigureConsumer<GameMessageConsumer>(context);
         });
     });
 });
-
-builder.Services.AddScoped<IDeduplicationService, DeduplicationService>();
 
 var host = builder.Build();
 host.Run();

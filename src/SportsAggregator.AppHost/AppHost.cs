@@ -23,10 +23,8 @@ var dbMigration = builder
 var gameProcessor = builder
     .AddProject<Projects.SportsAggregator_GameProcessor>("game-processor")
     .WithReference(sportsDatabase)
-    .WithReference(redis)
     .WithReference(rabbitMq)
     .WaitFor(sportsDatabase)
-    .WaitFor(redis)
     .WaitFor(rabbitMq)
     .WaitForCompletion(dbMigration);
 

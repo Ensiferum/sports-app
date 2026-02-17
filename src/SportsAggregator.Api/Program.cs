@@ -1,7 +1,6 @@
 using SportsAggregator.Api.Endpoints;
 using SportsAggregator.Api.Services;
 using SportsAggregator.Infrastructure.Data;
-using SportsAggregator.Infrastructure.Services;
 using Scalar.AspNetCore;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
@@ -32,7 +31,6 @@ builder.Services
 builder.Services.AddValidation();
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<GameQueryService>();
-builder.Services.AddScoped<IDeduplicationService, DeduplicationService>();
 
 var app = builder.Build();
 

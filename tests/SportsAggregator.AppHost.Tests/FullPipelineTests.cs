@@ -34,26 +34,29 @@ public sealed class FullPipelineTests
         var grouped = response
             .GroupBy(g => new
             {
-                g.SportType,
-                g.CompetitionName,
+                SportType = g.SportType.Trim().ToLowerInvariant(),
+                CompetitionName = g.CompetitionName.Trim().ToLowerInvariant(),
                 TeamA = string.Compare(g.HomeTeam, g.AwayTeam, StringComparison.OrdinalIgnoreCase) <= 0
                     ? g.HomeTeam.Trim().ToLowerInvariant()
                     : g.AwayTeam.Trim().ToLowerInvariant(),
                 TeamB = string.Compare(g.HomeTeam, g.AwayTeam, StringComparison.OrdinalIgnoreCase) <= 0
                     ? g.AwayTeam.Trim().ToLowerInvariant()
-                    : g.HomeTeam.Trim().ToLowerInvariant(),
-                Bucket = new DateTime(
-                    g.ScheduledAtUtc.Year,
-                    g.ScheduledAtUtc.Month,
-                    g.ScheduledAtUtc.Day,
-                    g.ScheduledAtUtc.Hour / 2 * 2,
-                    0,
-                    0,
-                    DateTimeKind.Utc)
+                    : g.HomeTeam.Trim().ToLowerInvariant()
             })
             .ToList();
 
-        grouped.Should().OnlyContain(group => group.Count() == 1);
+        foreach (var group in grouped)
+        {
+            var ordered = group
+                .OrderBy(game => game.ScheduledAtUtc.ToUniversalTime())
+                .ToList();
+
+            for (var i = 1; i < ordered.Count; i++)
+            {
+                var gap = ordered[i].ScheduledAtUtc.ToUniversalTime() - ordered[i - 1].ScheduledAtUtc.ToUniversalTime();
+                gap.Should().BeGreaterThan(TimeSpan.FromHours(2));
+            }
+        }
     }
 
     private static async Task<IReadOnlyList<GameResponse>> WaitForGamesAsync(
