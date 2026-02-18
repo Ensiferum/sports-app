@@ -14,6 +14,51 @@ This project runs a small event-driven pipeline:
 4. Unique games are persisted to PostgreSQL.
 5. `SportsAggregator.Api` exposes `GET /games` with filters and caching.
 
+## Architecture Diagram
+
+### High-Level System Architecture
+
+```mermaid
+%%{init: {"flowchart": {"curve": "linear", "nodeSpacing": 70, "rankSpacing": 90}}}%%
+flowchart TB
+    subgraph Sources["Mock Sources"]
+        direction LR
+        Football["Football Source"]
+        Basketball["Basketball Source"]
+        Hockey["Hockey Source"]
+    end
+
+    subgraph EventFlow["Ingestion + Messaging + Processing"]
+        direction LR
+        Ingestion["Ingestion Worker"]
+        Rabbit["Message Bus (RabbitMQ)"]
+        Queue["sports.games.queue"]
+        Processor["Game Processor Worker"]
+    end
+
+    subgraph Serving["API + Data"]
+        direction LR
+        Client["API Consumer"]
+        Api["API (Minimal API)"]
+        SportsDb[("sportsdb (PostgreSQL)")]
+        Redis[("Redis Cache")]
+    end
+
+    Football --> Ingestion
+    Basketball --> Ingestion
+    Hockey --> Ingestion
+
+    Ingestion -->|publish event| Rabbit
+    Rabbit -->|enqueue message| Queue
+    Queue -->|consume event| Processor
+    Processor -->|dedupe 2h and persist| SportsDb
+
+    Client -->|GET /games| Api
+    Client -->|/scalar docs| Api
+    Api -->|query games| SportsDb
+    Api <-->|cache responses| Redis
+```
+
 ## Tech Stack
 
 - .NET 10 (C#)
