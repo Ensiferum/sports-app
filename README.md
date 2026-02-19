@@ -19,44 +19,48 @@ This project runs a small event-driven pipeline:
 ### High-Level System Architecture
 
 ```mermaid
-%%{init: {"flowchart": {"curve": "linear", "nodeSpacing": 70, "rankSpacing": 90}}}%%
-flowchart TB
-    subgraph Sources["Mock Sources"]
-        direction LR
-        Football["Football Source"]
-        Basketball["Basketball Source"]
-        Hockey["Hockey Source"]
+---
+title: Sports Aggregator - Architecture
+config:
+  theme: default
+---
+flowchart LR
+    subgraph Sources["Data Sources"]
+        F["Football Source"]
+        B["Basketball Source"]
+        H["Ice Hockey Source"]
     end
 
-    subgraph EventFlow["Ingestion + Messaging + Processing"]
-        direction LR
-        Ingestion["Ingestion Worker"]
-        Rabbit["Message Bus (RabbitMQ)"]
-        Queue["sports.games.queue"]
-        Processor["Game Processor Worker"]
+    subgraph Ingestion["Ingestion Service"]
+        IW["Ingestion Worker"]
     end
 
-    subgraph Serving["API + Data"]
-        direction LR
-        Client["API Consumer"]
-        Api["API (Minimal API)"]
-        SportsDb[("sportsdb (PostgreSQL)")]
-        Redis[("Redis Cache")]
+    F --> IW
+    B --> IW
+    H --> IW
+
+    RMQ[("RabbitMQ")]
+    IW -- publish --> RMQ
+
+    subgraph Processing["Game Processor Service"]
+        GP["Consumer (dedup + persist)"]
     end
 
-    Football --> Ingestion
-    Basketball --> Ingestion
-    Hockey --> Ingestion
+    RMQ -- consume --> GP
 
-    Ingestion -->|publish event| Rabbit
-    Rabbit -->|enqueue message| Queue
-    Queue -->|consume event| Processor
-    Processor -->|dedupe 2h and persist| SportsDb
+    PG[("PostgreSQL sportsdb")]
+    GP -- write --> PG
 
-    Client -->|GET /games| Api
-    Client -->|/scalar docs| Api
-    Api -->|query games| SportsDb
-    Api <-->|cache responses| Redis
+    subgraph API["REST API Service"]
+        EP["GET /games (filter + cache)"]
+    end
+
+    EP -- read --> PG
+
+    Redis[("Redis Cache")]
+    EP <-- cache --> Redis
+
+    Client(["API Client"]) --> EP
 ```
 
 ## Tech Stack
